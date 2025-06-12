@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>📝 To-Do List App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --bg-dark: #2c3e50;
+            --text-dark: #ecf0f1;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: var(--text-dark);
+        }
+    </style>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <button class="toggle-mode" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+    <h1>🌟 My To-Do List</h1>
+
+    <form method="get" action="/" class="search-box">
+        <input type="text" name="search" placeholder="🔍 Search tasks..." value="{{ search_query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <form method="post" action="/add" class="add-task">
+        <input type="text" name="task" placeholder="📝 Task title" required>
+        <input type="date" name="due">
+        <select name="category">
+            <option value="">📂 No Category</option>
+            <option value="Work">💼 Work</option>
+            <option value="Personal">🏠 Personal</option>
+            <option value="Study">📚 Study</option>
+        </select>
+        <button type="submit">Add ➕</button>
+    </form>
+
+    <h2>🕒 Pending Tasks</h2>
+    <ul>
+        {% for index, task in pending_tasks %}
+            <li class="{% if task.due and task.due < current_date %}urgent{% endif %}">
+                <input type="checkbox" onclick="location.href='/complete/{{ index }}'">
+                <span class="task-title">{{ task.title }}</span>
+                {% if task.due %}<span class="due">📅 {{ task.due }}</span>{% endif %}
+                {% if task.category %}<span class="category">📁 {{ task.category }}</span>{% endif %}
+                <form method="post" action="/edit/{{ index }}" class="inline-form">
+                    <input type="text" name="title" value="{{ task.title }}" required>
+                    <input type="date" name="due" value="{{ task.due }}">
+                    <select name="category">
+                        <option value="Work" {% if task.category == "Work" %}selected{% endif %}>💼 Work</option>
+                        <option value="Personal" {% if task.category == "Personal" %}selected{% endif %}>🏠 Personal</option>
+                        <option value="Study" {% if task.category == "Study" %}selected{% endif %}>📚 Study</option>
+                    </select>
+                    <button type="submit">💾</button>
+                </form>
+                <a href="/delete/{{ index }}" class="delete-btn">🗑️</a>
+            </li>
+        {% else %}
+            <p class="empty-msg">No pending tasks 🎉</p>
+        {% endfor %}
+    </ul>
+
+    <h2>✅ Completed Tasks</h2>
+    <ul>
+        {% for index, task in completed_tasks %}
+            <li class="completed">
+                <input type="checkbox" checked onclick="location.href='/complete/{{ index }}'">
+                <span class="task-title">{{ task.title }}</span>
+                {% if task.due %}<span class="due">📅 {{ task.due }}</span>{% endif %}
+                {% if task.category %}<span class="category">📁 {{ task.category }}</span>{% endif %}
+                <a href="/delete/{{ index }}" class="delete-btn">🗑️</a>
+            </li>
+        {% else %}
+            <p class="empty-msg">No tasks completed yet ✅</p>
+        {% endfor %}
+    </ul>
+</div>
+</body>
+</html>
